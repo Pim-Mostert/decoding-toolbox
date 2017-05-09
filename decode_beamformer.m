@@ -12,7 +12,8 @@ function Xhat = decode_beamformer(cfg0, decoder, Y)
 %                                                 specified in the following ways:
 %                        = 'trainData'            The mean of the training data (default).
 %                        = 'testData'             The mean of the testing data.
-%                        = [F x 1] vector         Manually specified mean.
+%                        = [F x 1] vector         Manually specified mean, where F is the number of
+%                                                 features (e.g. sensors).
 %                        = 'no'                   No demeaning.
 %
 %    Xhat        Vector or matrix of size C x N, where C is the number of components, containing

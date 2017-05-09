@@ -1,9 +1,7 @@
 function decoder = train_pattern(cfg0, X, Y)
-% To be updated
-
-% [decoder] = train_beamformer(cfg, X, Y)
-%    Trains a linear decoder "beamformer style" to optimally recover the latent components as 
-%    prescribed in X. Several decoders may be trained indepedently, corresponding to several
+% [decoder] = train_pattern(cfg, X, Y)
+%    Linearly estimates the feature pattern corresponding to activity in a latent component as
+%    prescribed in X. Several patterns may be trained indepedently, corresponding to several
 %    latent components.
 %
 %    X           Vector or matrix of size C x N, where C is the number of components and N is
@@ -12,21 +10,17 @@ function decoder = train_pattern(cfg0, X, Y)
 %    Y           Matrix of size F x N, where F is the number of features, that contains the
 %                training data.
 %    cfg         Configuration struct that can possess the following fields:
-%                .gamma = [scalar]                Shrinkage regularization parameter, with range [0 1]. 
-%                                                 No default given.
 %                .discardNan = 'yes' or 'no'      Whether trials with NaN in either X or Y should be
 %                                                 removed prior to training. Default is 'no'.
-%                .returnPattern = 'yes' or 'no'   Whether the spatial patterns of the components should
-%                                                 be returned. Default = 'no';
 %                .demean = 'yes' or 'no'          Whether to demean the data first (per feature, over
 %                                                 trials). Default = 'yes';.
 %
 %    decoder     The (set of) decoder(s), that may be passed on to an appropriate decoding function,
 %                e.g. decode_beamformer. It may contain a field .pattern of size C x F
 %
-%    See also DECODE_BEAMFORMER.
+%    See also DECODE_PATTERN.
 
-%    Created by Pim Mostert, 2016
+%    Created by Pim Mostert, 2017
 
 if ~isfield(cfg0, 'discardNan')
     cfg0.discardNan = 0;

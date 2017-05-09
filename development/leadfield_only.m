@@ -45,11 +45,13 @@ design = designMatrix_BH(cfg, phi_train);
 
 % Train decoder
 cfg = [];
+cfg.gamma = 0.01;
 decoder = train_pattern(cfg, design, Y_train);
 
 % Decode
 cfg = [];
-Xhat = decode_beamformer(cfg, decoder, Y_test);
+cfg.gamma = 0.01;
+Xhat = decode_pattern(cfg, decoder, Y_test);
 
 % Shift accordign to orientation
 Xhat_shifted = zeros(numC, length(folds{2}));
@@ -113,9 +115,9 @@ design = designMatrix_BH(cfg, phi);
 cfg = [];
 cfg.feedback = 'yes';
 cfg.folds = folds;
-cfg.trainfun = 'train_beamformer';
-cfg.traincfg.gamma = 0.01;
-cfg.decodefun = 'decode_beamformer';
+cfg.trainfun = 'train_pattern';
+cfg.decodefun = 'decode_pattern';
+cfg.decodecfg.gamma = 0.1;
 
 Xhat = decodeCrossValidation(cfg, design, squeeze(Y(:, sel_t, :)));
 
@@ -399,16 +401,30 @@ cfg = [];
 cfg.nFold = 5;
 folds = createFolds(cfg, X);
 
+% Calculate covariance
+numF = size(Y, 1);
+numT = size(Y, 2);
+numN = size(Y, 3);
+
+S = zeros(numF, numF);
+for it = 1:numT
+    S = S + cov(squeeze(Y(:, it, :))')/numN;
+end
+
+gamma = 0.01;
+S = (1-gamma)*S + gamma*eye(numF)*trace(S)/numF;
+    
 cfg = [];
 cfg.folds = folds;
 cfg.feedback = 'yes';
 cfg.trainfun = 'train_array';
 cfg.traincfg.feedback = 'yes';
-cfg.traincfg.trainfun = 'train_beamformer';
-cfg.traincfg.traincfg.gamma = 0.01;
+cfg.traincfg.trainfun = 'train_pattern';
 cfg.decodefun = 'decode_arrayGeneralization';
 cfg.decodecfg.feedback = 'yes';
-cfg.decodecfg.decodefun = 'decode_beamformer';
+cfg.decodecfg.decodefun = 'decode_pattern';
+cfg.decodecfg.decodecfg.covariance = S;
+%cfg.decodecfg.decodecfg.gamma = 0.1;
 
 Xhat = decodeCrossValidation(cfg, design, Y);
 

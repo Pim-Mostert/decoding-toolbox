@@ -1,9 +1,9 @@
-function Xhat = decode_beamformer(cfg0, decoder, Y)
-% [Xhat] = decode_beamformer(cfg, decoder, Y)
+function Xhat = decode_pattern(cfg0, decoder, Y)
+% [Xhat] = decode_pattern(cfg, decoder, Y)
 %    Estimate the activity of latent components using a linear decoder, obtained from an
 %    appropriate training function. Several components may be estimated independently.
 %
-%    decoder     The linear decoder obtained from e.g. train_beamformer.
+%    decoder     The linear decoder obtained from e.g. train_pattern.
 %    Y           Matrix of size F x N, where F is the number of features and the N the number of trials,
 %                that contains the data that is to be decoded.
 %    cfg         Configuration struct that can possess the following fields:
@@ -14,20 +14,31 @@ function Xhat = decode_beamformer(cfg0, decoder, Y)
 %                        = 'testData'             The mean of the testing data.
 %                        = [F x 1] vector         Manually specified mean.
 %                        = 'no'                   No demeaning.
+%                .covariance                      Whether the pattern should be multiplied by the
+%                                                 inverse of a covariance matrix.
+%                        = 'testData'             The covariance of the testing data. Specify
+%                                                 covariance.gamma for regularization.
+%                        = [F x F] vector         Manually specified covariance matrix, where F is
+%                                                 the number of features (e.g. sensors).
+%                        = 'no'                   (default)
 %
 %    Xhat        Vector or matrix of size C x N, where C is the number of components, containing
 %                the decoded data.
 %
-%    See also TRAIN_BEAMFORMER.
+%    See also TRAIN_PATTERN.
 
-%    Created by Pim Mostert, 2016
+%    Created by Pim Mostert, 2017
 
 if ~isfield(cfg0, 'demean')
     cfg0.demean = 'trainData';
 end
+if ~isfield(cfg0, 'covariance')
+    cfg0.covariance = 'no';
+end
 
 % Convert to matrix
 numN = size(Y, 2);
+numF = size(Y, 1);
 
 % Demean
 if strcmp(cfg0.demean, 'trainData')
@@ -46,7 +57,24 @@ else
     error('Demeaning configuration ''%s'' is unknown', cfg0.demean);
 end
         
+% Calculate filter
+if strcmp(cfg0.covariance, 'testData')
+    S = cov(Y');
+
+    % Regularize
+    if isfield(cfg0, 'gamma')
+        S = (1-cfg0.gamma)*S + cfg0.gamma*eye(numF)*trace(S)/numF;
+    end
+    
+    % Calculate filter
+    W = decoder.W/S;
+elseif strcmp(cfg0.covariance, 'no');
+    W = decoder.W;
+elseif isnumeric(cfg0.covariance)
+    W = decoder.W/cfg0.covariance;
+end
+
 % Decode
-Xhat = decoder.W*Y;
+Xhat = W*Y;
 
 end
