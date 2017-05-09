@@ -1,6 +1,4 @@
 function Xhat = decode_beamformer(cfg0, decoder, Y)
-% To be updated
-
 % [Xhat] = decode_beamformer(cfg, decoder, Y)
 %    Estimate the activity of latent components using a linear decoder, obtained from an
 %    appropriate training function. Several components may be estimated independently.
