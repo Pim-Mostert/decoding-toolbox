@@ -10,13 +10,13 @@ function Xhat = decode_pattern(cfg0, decoder, Y)
 %                .demean                          Whether the data should be demeaned (per feature,
 %                                                 over trials) prior to decoding. The mean can be
 %                                                 specified in the following ways:
-%                        = 'trainData'            The mean of the training data (default).
+%                        = 'trainData'            The nanmean of the training data (default).
 %                        = 'testData'             The mean of the testing data.
 %                        = [F x 1] vector         Manually specified mean.
 %                        = 'no'                   No demeaning.
 %                .covariance                      Whether the pattern should be multiplied by the
 %                                                 inverse of a covariance matrix.
-%                        = 'testData'             The covariance of the testing data. Specify
+%                        = 'testData'             The nancov of the testing data. Specify
 %                                                 covariance.gamma for regularization.
 %                        = [F x F] vector         Manually specified covariance matrix, where F is
 %                                                 the number of features (e.g. sensors).
