@@ -59,7 +59,7 @@ end
         
 % Calculate filter
 if strcmp(cfg0.covariance, 'testData')
-    S = cov(Y');
+    S = nancov(Y');
 
     % Regularize
     if isfield(cfg0, 'gamma')
