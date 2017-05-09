@@ -72,7 +72,10 @@ Xhat(:, 1, :, :) = reshape(Xhat_curDec, [prod(dimsOut), numT, numN]);
 
 tDec = tic;
 for iDec = 2:numD
-    Xhat_curDec = feval(cfg0.decodefun, cfg0.decodecfg, decoder{iDec}, reshape(Y, [dimsSub, numT*numN]));
+    Xhat_curDec = nan(prod(dimsOut), numT, numN);
+    for it = 1:numT
+        Xhat_curDec(:, it, :) = feval(cfg0.decodefun, cfg0.decodecfg, decoder{iDec}, squeeze(Y(:, it, :)));
+    end
     Xhat(:, iDec, :, :) = reshape(Xhat_curDec, [prod(dimsOut), numT, numN]);
 
     if (toc(tDec) > 2) && strcmp(cfg0.feedback, 'yes')
