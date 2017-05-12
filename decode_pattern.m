@@ -17,7 +17,7 @@ function Xhat = decode_pattern(cfg0, decoder, Y)
 %                .covariance                      Whether the pattern should be multiplied by the
 %                                                 inverse of a covariance matrix.
 %                        = 'testData'             The nancov of the testing data. Specify
-%                                                 covariance.gamma for regularization.
+%                                                 cfg.gamma for regularization.
 %                        = [F x F] vector         Manually specified covariance matrix, where F is
 %                                                 the number of features (e.g. sensors).
 %                        = 'no'                   (default)

@@ -1,11 +1,12 @@
-function Xhat = decode_beamformer(cfg0, decoder, Y)
-% [Xhat] = decode_beamformer(cfg, decoder, Y)
-%    Estimate the activity of latent components using a linear decoder, obtained from an
-%    appropriate training function. Several components may be estimated independently.
+function pPost = decode_probClass(cfg0, decoder, Y)
+% pPost = decode_beamformer(cfg, decoder, Y)
+%    Apply probabilistic multiclass decoder, obtained from an appropriate training function. It 
+%    returns the posterior probabilities of a the trial belonging to a class, given the data. At 
+%    this moment the inclusion of (non-uniform) prior probabilities is however not yet implemented.
 %
-%    decoder     The linear decoder obtained from e.g. train_beamformer.
+%    decoder     The probabilistic multiclass decoder obtained from e.g. train_probClass.
 %    Y           Matrix of size F x N, where F is the number of features and the N the number of trials,
-%                that contains the data that is to be decoded.
+%                that contains the data that is to be classified.
 %    cfg         Configuration struct that can possess the following fields:
 %                .demean                          Whether the data should be demeaned (per feature,
 %                                                 over trials) prior to decoding. The mean can be
@@ -16,19 +17,20 @@ function Xhat = decode_beamformer(cfg0, decoder, Y)
 %                                                 features (e.g. sensors).
 %                        = 'no'                   No demeaning.
 %
-%    Xhat        Vector or matrix of size C x N, where C is the number of components, containing
-%                the decoded data.
+%    pPost       Matrix of size C x N, where C is the number of classes, that contains the posterior
+%                probabilities of the trial belonging to each of the classes, given the data.
 %
-%    See also TRAIN_BEAMFORMER.
+%    See also TRAIN_PROBCLASS.
 
-%    Created by Pim Mostert, 2016
+%    Created by Pim Mostert, 2017
 
 if ~isfield(cfg0, 'demean')
     cfg0.demean = 'trainData';
 end
 
-% Convert to matrix
+% Useful variables
 numN = size(Y, 2);
+numC = size(decoder.W, 1);
 
 % Demean
 if strcmp(cfg0.demean, 'trainData')
@@ -44,11 +46,12 @@ elseif strcmp(cfg0.demean, 'testData')
 elseif isnumeric(cfg0.demean)
     Y = Y - repmat(cfg0.demean, [1, numN]);
 elseif strcmp(cfg0.demean, 'no')
-else
+else    
     error('Demeaning configuration ''%s'' is unknown', cfg0.demean);
 end
         
 % Decode
-Xhat = decoder.W*Y;
+pPost = exp(decoder.W*Y + repmat(decoder.b, [1, numN]));
+pPost = pPost ./ repmat(sum(pPost, 1), [numC, 1]);
 
 end
